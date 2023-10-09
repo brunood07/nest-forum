@@ -25,11 +25,11 @@ Content-Type: application/json
 ###
 
 # @name create_question
-POST {{baseUrl}}/sessions
+POST {{baseUrl}}/questions
 Content-Type: application/json
 Authorization: Bearer {{authToken}}
 
 {
-  "email": "teste@email.com",
-  "password": "123456"
+  "title": "Título teste",
+  "content": "lorem ipsum dolor sit amet, consectetur"
 }
