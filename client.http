@@ -33,3 +33,10 @@ Authorization: Bearer {{authToken}}
   "title": "Título teste",
   "content": "lorem ipsum dolor sit amet, consectetur"
 }
+
+###
+
+# @name fetch_recent_question
+GET {{baseUrl}}/questions?page=1
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
