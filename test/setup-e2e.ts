@@ -1,15 +1,14 @@
 import 'dotenv/config'
 
 import { PrismaClient } from '@prisma/client'
-import { afterAll } from 'vitest'
-import { randomUUID } from 'crypto'
-import { execSync } from 'child_process'
+import { randomUUID } from 'node:crypto'
+import { execSync } from 'node:child_process'
 
 const prisma = new PrismaClient()
 
 function generateUniqueDatabaseURL(schemaId: string) {
   if (!process.env.DATABASE_URL) {
-    throw new Error('Please provide a database url environment variable')
+    throw new Error('Please provider a DATABASE_URL environment variable')
   }
 
   const url = new URL(process.env.DATABASE_URL)
@@ -22,9 +21,9 @@ function generateUniqueDatabaseURL(schemaId: string) {
 const schemaId = randomUUID()
 
 beforeAll(async () => {
-  const databaseUrl = generateUniqueDatabaseURL(schemaId)
+  const databaseURL = generateUniqueDatabaseURL(schemaId)
 
-  process.env.DATABASE_URL = databaseUrl
+  process.env.DATABASE_URL = databaseURL
 
   execSync('npx prisma migrate deploy')
 })
