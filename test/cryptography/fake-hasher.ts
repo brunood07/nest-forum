@@ -1,4 +1,4 @@
-import { HashComparer } from '@/domain/forum/application/cryptography/hasher-comparer'
+import { HashComparer } from '@/domain/forum/application/cryptography/hash-comparer'
 import { HasherGenerator } from '@/domain/forum/application/cryptography/hasher-generator'
 
 export class FakeHasher implements HasherGenerator, HashComparer {
