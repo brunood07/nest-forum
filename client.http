@@ -30,7 +30,7 @@ Content-Type: application/json
 Authorization: Bearer {{authToken}}
 
 {
-  "title": "Título teste",
+  "title": "Título teste23",
   "content": "lorem ipsum dolor sit amet, consectetur"
 }
 
