@@ -35,7 +35,7 @@ export class UploadAttachmentController {
   ) {
     const result = await this.uploadAndCreateAttachment.execute({
       body: file.buffer,
-      fileName: file.filename,
+      fileName: file.originalname,
       fileType: file.mimetype,
     })
 

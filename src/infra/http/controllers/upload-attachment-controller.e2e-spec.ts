@@ -1,61 +1,44 @@
-import { InvalidAttachmentTypeError } from '@/domain/forum/application/use-cases/errors/invalid-attachment-type-error'
-import { UploadAndCreateAttachmentUseCase } from '@/domain/forum/application/use-cases/upload-and-create-attachment'
-import {
-  BadRequestException,
-  Controller,
-  FileTypeValidator,
-  MaxFileSizeValidator,
-  ParseFilePipe,
-  Post,
-  UploadedFile,
-  UseInterceptors,
-} from '@nestjs/common'
-import { FileInterceptor } from '@nestjs/platform-express'
+import { AppModule } from '@/infra/app.module'
+import { DatabaseModule } from '@/infra/database/database.module'
+import { INestApplication } from '@nestjs/common'
+import { JwtService } from '@nestjs/jwt'
+import { Test } from '@nestjs/testing'
+import request from 'supertest'
+import { QuestionFactory } from 'test/factories/make-question'
+import { StudentFactory } from 'test/factories/make-student'
 
-@Controller('/attachments')
-export class UploadAttachmentController {
-  constructor(
-    private uploadAndCreateAttachment: UploadAndCreateAttachmentUseCase,
-  ) {}
+describe('Upload attachment (E2E)', () => {
+  let app: INestApplication
+  let studentFactory: StudentFactory
+  let jwt: JwtService
 
-  @Post()
-  @UseInterceptors(FileInterceptor('file'))
-  async handle(
-    @UploadedFile(
-      new ParseFilePipe({
-        validators: [
-          new MaxFileSizeValidator({
-            maxSize: 1024 * 1024 * 2, // 2mb
-          }),
-          new FileTypeValidator({
-            fileType: '.(png|jpg|jpeg|pdf)',
-          }),
-        ],
-      }),
-    )
-    file: Express.Multer.File,
-  ) {
-    const result = await this.uploadAndCreateAttachment.execute({
-      fileName: file.originalname,
-      fileType: file.mimetype,
-      body: file.buffer,
+  beforeAll(async () => {
+    const moduleRef = await Test.createTestingModule({
+      imports: [AppModule, DatabaseModule],
+      providers: [StudentFactory, QuestionFactory],
+    }).compile()
+
+    app = moduleRef.createNestApplication()
+
+    studentFactory = moduleRef.get(StudentFactory)
+    jwt = moduleRef.get(JwtService)
+
+    await app.init()
+  })
+
+  test('[POST] /attachments', async () => {
+    const user = await studentFactory.makePrismaStudent()
+
+    const accessToken = jwt.sign({ sub: user.id.toString() })
+
+    const response = await request(app.getHttpServer())
+      .post('/attachments')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .attach('file', './test/e2e/sample-upload.png')
+
+    expect(response.statusCode).toBe(201)
+    expect(response.body).toEqual({
+      attachmentId: expect.any(String),
     })
-
-    if (result.isLeft()) {
-      const error = result.value
-
-      switch (error.constructor) {
-        case InvalidAttachmentTypeError:
-          throw new BadRequestException(error.message)
-        default:
-          throw new BadRequestException(error.message)
-      }
-    }
-
-    const { attachment } = result.value
-
-    return {
-      attachmentId: attachment.id.toString(),
-    }
-  }
-}
+  })
+})

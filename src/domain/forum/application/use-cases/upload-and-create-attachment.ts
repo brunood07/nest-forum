@@ -5,17 +5,15 @@ import { Attachment } from '../../enterprise/entities/attachment'
 import { AttachmentsRepository } from '../repositories/attachments-repository'
 import { Uploader } from '../storage/uploader'
 
-interface UploadAndCreateAttachmentUseCaseRequest {
+interface UploadAndCreateAttachmentRequest {
   fileName: string
   fileType: string
   body: Buffer
 }
 
-type UploadAndCreateAttachmentUseCaseReponse = Either<
+type UploadAndCreateAttachmentResponse = Either<
   InvalidAttachmentTypeError,
-  {
-    attachment: Attachment
-  }
+  { attachment: Attachment }
 >
 
 @Injectable()
@@ -25,16 +23,16 @@ export class UploadAndCreateAttachmentUseCase {
     private uploader: Uploader,
   ) {}
 
-  async execute(
-    data: UploadAndCreateAttachmentUseCaseRequest,
-  ): Promise<UploadAndCreateAttachmentUseCaseReponse> {
-    const { fileName, fileType } = data
-
+  async execute({
+    fileName,
+    fileType,
+    body,
+  }: UploadAndCreateAttachmentRequest): Promise<UploadAndCreateAttachmentResponse> {
     if (!/^(image\/(jpeg|png))$|^application\/pdf$/.test(fileType)) {
       return left(new InvalidAttachmentTypeError(fileType))
     }
 
-    const { url } = await this.uploader.upload(data)
+    const { url } = await this.uploader.upload({ fileName, fileType, body })
 
     const attachment = Attachment.create({
       title: fileName,
