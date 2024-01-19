@@ -50,7 +50,7 @@ export class InMemoryQuestionCommentsRepository
       .slice((page - 1) * 20, page * 20)
       .map((comment) => {
         const author = this.studentsRepository.items.find((student) => {
-          return student.id.toValue() === comment.authorId.toValue()
+          return student.id.equals(comment.authorId)
         })
 
         if (!author) {
@@ -61,8 +61,8 @@ export class InMemoryQuestionCommentsRepository
 
         return CommentWithAuthor.create({
           author: author.name,
-          authorId: comment.authorId.toValue(),
-          commentId: comment.id.toValue(),
+          authorId: comment.authorId,
+          commentId: comment.id,
           content: comment.content,
           createdAt: comment.createdAt,
           updatedAt: comment.updatedAt,

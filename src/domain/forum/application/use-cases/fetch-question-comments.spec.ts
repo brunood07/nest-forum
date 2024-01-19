@@ -52,15 +52,15 @@ describe('Fetch question comments use case', () => {
       expect.arrayContaining([
         expect.objectContaining({
           author: 'John Doe',
-          commentId: comment1.id,
+          authorId: student.id,
         }),
         expect.objectContaining({
           author: 'John Doe',
-          commentId: comment2.id,
+          authorId: student.id,
         }),
         expect.objectContaining({
           author: 'John Doe',
-          commentId: comment3.id,
+          authorId: student.id,
         }),
       ]),
     )
@@ -69,7 +69,8 @@ describe('Fetch question comments use case', () => {
   it('should be able to fetch pagineted question comments', async () => {
     const student = makeStudent({ name: 'John Doe' })
 
-    questionCommentsRepository.items = []
+    studentsRepository.items.push(student)
+
     for (let i = 1; i <= 22; i++) {
       await questionCommentsRepository.create(
         makeQuestionComment({
@@ -80,10 +81,10 @@ describe('Fetch question comments use case', () => {
     }
 
     const result = await sut.execute({
-      page: 2,
       questionId: 'question-1',
+      page: 2,
     })
 
-    expect(result.value?.questionComments).toHaveLength(2)
+    expect(result.value?.questionComments).toHaveLength(5)
   })
 })
